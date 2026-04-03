@@ -5,7 +5,18 @@ canvas.height = window.innerHeight;
 
 const ctx = canvas.getContext("2d");
 
-// Bigger joystick settings
+// Player
+let player = {
+  x: 200,
+  y: canvas.height - 150,
+  size: 30,
+  velocityY: 0,
+  jumping: false
+};
+
+const ground = canvas.height - 120;
+
+// Joystick
 const joystick = {
   baseX: 100,
   baseY: canvas.height - 120,
@@ -14,17 +25,6 @@ const joystick = {
   active: false,
   dx: 0
 };
-
-let player = {
-  x: 100,
-  y: canvas.height - 150,
-  size: 30,
-  velocityY: 0,
-  jumping: false
-};
-
-// Ground level
-const ground = canvas.height - 120;
 
 // Jump button
 const jumpBtn = document.getElementById("jumpBtn");
@@ -35,24 +35,20 @@ jumpBtn.onclick = () => {
   }
 };
 
-// Touch joystick
+// Touch controls
 canvas.addEventListener("touchstart", (e) => {
-  let touch = e.touches[0];
-  let dx = touch.clientX - joystick.baseX;
-  let dy = touch.clientY - joystick.baseY;
+  let t = e.touches[0];
+  let dx = t.clientX - joystick.baseX;
+  let dy = t.clientY - joystick.baseY;
 
-  let distance = Math.sqrt(dx * dx + dy * dy);
-
-  if (distance < joystick.baseRadius) {
+  if (Math.sqrt(dx * dx + dy * dy) < joystick.baseRadius) {
     joystick.active = true;
   }
 });
 
 canvas.addEventListener("touchmove", (e) => {
   if (!joystick.active) return;
-
-  let touch = e.touches[0];
-  joystick.dx = touch.clientX - joystick.baseX;
+  joystick.dx = e.touches[0].clientX - joystick.baseX;
 });
 
 canvas.addEventListener("touchend", () => {
@@ -60,13 +56,10 @@ canvas.addEventListener("touchend", () => {
   joystick.dx = 0;
 });
 
-// Movement (LESS sensitive)
+// Movement
 function movePlayer() {
-  if (joystick.dx > 20) {
-    player.x += 4;
-  } else if (joystick.dx < -20) {
-    player.x -= 4;
-  }
+  if (joystick.dx > 20) player.x += 4;
+  if (joystick.dx < -20) player.x -= 4;
 }
 
 // Physics
@@ -82,25 +75,49 @@ function update() {
   }
 }
 
-// Draw everything
+// 🔥 Draw 3D block
+function drawBlock(x, y, size) {
+  // Front
+  ctx.fillStyle = "#4CAF50";
+  ctx.fillRect(x, y, size, size);
+
+  // Top
+  ctx.fillStyle = "#81C784";
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + 10, y - 10);
+  ctx.lineTo(x + size + 10, y - 10);
+  ctx.lineTo(x + size, y);
+  ctx.fill();
+
+  // Side
+  ctx.fillStyle = "#388E3C";
+  ctx.beginPath();
+  ctx.moveTo(x + size, y);
+  ctx.lineTo(x + size + 10, y - 10);
+  ctx.lineTo(x + size + 10, y + size - 10);
+  ctx.lineTo(x + size, y + size);
+  ctx.fill();
+}
+
+// Draw
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Ground
-  ctx.fillStyle = "green";
-  ctx.fillRect(0, ground + player.size, canvas.width, 50);
+  // Ground blocks
+  for (let i = 0; i < canvas.width; i += 40) {
+    drawBlock(i, ground + 30, 40);
+  }
 
-  // Player
-  ctx.fillStyle = "black";
-  ctx.fillRect(player.x, player.y, player.size, player.size);
+  // Player (as cube)
+  drawBlock(player.x, player.y, player.size);
 
-  // Joystick base
+  // Joystick
   ctx.globalAlpha = 0.4;
   ctx.beginPath();
   ctx.arc(joystick.baseX, joystick.baseY, joystick.baseRadius, 0, Math.PI * 2);
   ctx.fill();
 
-  // Joystick knob
   ctx.globalAlpha = 0.8;
   ctx.beginPath();
   ctx.arc(
@@ -115,7 +132,7 @@ function draw() {
   ctx.globalAlpha = 1;
 }
 
-// Game loop
+// Loop
 function gameLoop() {
   update();
   draw();
