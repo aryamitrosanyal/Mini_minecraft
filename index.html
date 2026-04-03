@@ -2,11 +2,37 @@
 <html>
 <head>
   <title>Mini Minecraft</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    canvas {
+      display: block;
+      background: #87CEEB;
+    }
+
+    /* Jump button */
+    #jumpBtn {
+      position: fixed;
+      right: 30px;
+      bottom: 40px;
+      width: 70px;
+      height: 70px;
+      font-size: 30px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.7);
+    }
+  </style>
 </head>
 <body>
-  <h1>Mini Minecraft 🚀</h1>
-  <p>Use arrow keys to move, space to jump</p>
 
-  <script src="game.js"></script>
+<button id="jumpBtn">⬆️</button>
+
+<script src="game.js"></script>
+
 </body>
 </html>
